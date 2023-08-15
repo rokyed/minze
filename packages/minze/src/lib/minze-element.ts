@@ -325,9 +325,9 @@ export class MinzeElement extends HTMLElement {
         :where(img, svg, video, canvas, audio, iframe, embed, object):not([no-css-reset]) { display: block; max-width: 100%; height: auto; }
         :where(button, [role="button"]):not([no-css-reset]) { font-size: 100%; text-transform: none; cursor: pointer; }
         ` : '' }}
-        ${`@layer default {${this.css?.()}}` ?? ''}
+        ${`@layer default {${this.css?.call(this)}}` ?? ''}
       </style>
-      ${this.html?.() ?? '<slot></slot>'}
+      ${this.html?.call(this) ?? '<slot></slot>'}
     `
   }
 
