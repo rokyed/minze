@@ -38,4 +38,19 @@ describe('Minze', () => {
 
     expect(spy).toHaveBeenCalledOnce()
   })
+
+  test('attach,fire,detach', () => {
+    const callback = {
+      id: '',
+      fn: () => Minze.detach(callback.id)
+    }
+
+    const spy = vi.spyOn(callback, 'fn')
+
+    callback.id = Minze.attach(callback.fn)
+    Minze.fire(callback.id, 'test')
+    Minze.fire(callback.id, 'test')
+
+    expect(spy).toHaveBeenCalledOnce()
+  })
 })

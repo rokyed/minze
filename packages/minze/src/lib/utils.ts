@@ -4,6 +4,18 @@
  */
 export const isProxy = Symbol('isProxy')
 
+export type Callback = (...args: unknown[]) => unknown
+
+export function generateId(): string {
+  const id: string[] = []
+
+  for (let i = 0; i < 4; i++) {
+    id.push(Math.round(Math.random() * 65536).toString(16))
+  }
+
+  return id.join('-')
+}
+
 /**
  * Converts a camelCase or PascalCase string to dash-case.
  *

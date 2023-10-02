@@ -1,5 +1,5 @@
 import { MinzeElement } from './minze-element'
-import { warn } from './utils'
+import { warn, generateId, Callback } from './utils'
 
 /**
  * Minze: Global class with helpful static methods.
@@ -9,6 +9,94 @@ export class Minze {
    * The current Minze version.
    */
   static readonly version = __VERSION__
+
+  /**
+   * callbacks through `Minze.cb` are stored here.
+   * @private
+   *
+   */
+  private static _eventCallbacks: Record<string, Callback> = {}
+
+  /**
+   * Fires a callback function.
+   *
+   * @param cbId - The callback id.
+   * @param data - The data to pass to the callback function.
+   * @example
+   * ```
+   * export class MyElement extends MinzeElement {
+   *  attrs: Attrs = [
+   *   "on-click"
+   *  ];
+   *
+   *  onButtonClick() {
+   *    Minze.fire(this.onClick, 'Hello World')
+   *  }
+   *  html ()=> `
+   *  <button>Click me</button>
+   *  `;
+   *
+   *  eventListeners = [
+   *    ['button', 'click', this.onButtonClick.bind(this)]
+   *  ];
+   *  }
+   *
+   * ```
+   */
+
+  static fire(cbId: string, ...data: unknown[]) {
+    if (!cbId) return
+
+    if (cbId in Minze._eventCallbacks) {
+      try {
+        Minze._eventCallbacks[cbId].call(null, ...data)
+      } catch (e) {
+        warn(`Callback with id "${cbId}" failed: ${e}`)
+      }
+    }
+  }
+
+  /**
+   * Creates a callback id and stores the callback function.
+   * @param callback - The callback function.
+   * @returns The callback id.
+   * @example
+   * ```
+   * const cbId = Minze.attach((data) => console.log(data))
+   *
+   * html = `<my-element on-event="${cbId}"></my-element>`
+   *
+   * destroy() {
+   *   Minze.detach(cbId)
+   *   super.destroy()
+   * }
+   * ```
+   */
+  static attach(callback: Callback): string {
+    const id = generateId()
+    Minze._eventCallbacks[id] = callback
+    return id
+  }
+
+  /**
+   * Removes a callback function.
+   *
+   * @param id - The callback id.
+   * @example
+   * ```
+   * const cbId = Minze.attach((data) => console.log(data))
+   *
+   * html = `<my-element on-event="${cbId}"></my-element>`
+   *
+   * destroy() {
+   *   Minze.detach(cbId)
+   *   super.destroy()
+   * }
+   * ```
+   */
+  static detach(id: string) {
+    delete Minze._eventCallbacks[id]
+  }
 
   /**
    * Defines a custom element.
